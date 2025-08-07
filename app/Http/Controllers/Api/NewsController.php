@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\News;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class NewsController extends Controller
 {
@@ -22,15 +25,22 @@ class NewsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'heading'       => 'required|string|max:255',
-            'description'        => 'required|string',
-            'image_url'   => 'nullable|url'
+            'description'   => 'required|string',
+            'image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        $news = News::create($request->all());
+        $data = $request->only(['heading', 'description']);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('news', 'public');
+            $data['image_url'] = '/storage/' . $path;
+        }
+
+        $news = News::create($data);
         return response()->json($news, 201);
     }
 
@@ -60,16 +70,29 @@ class NewsController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'heading'       => 'required|string|max:255',
-            'description'        => 'required|string',
-            'image_url'   => 'nullable|url'
+            'heading'       => 'sometimes|string|max:255',
+            'description'   => 'sometimes|string',
+            'image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        $news->update($request->all());
+        $data = $request->only(['heading', 'description']);
+
+        if ($request->hasFile('image')) {
+            // eski rasmni o‘chirish
+            if ($news->image_url) {
+                $oldPath = str_replace('/storage/', '', $news->image_url);
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $path = $request->file('image')->store('news', 'public');
+            $data['image_url'] = '/storage/' . $path;
+        }
+
+        $news->update($data);
 
         return response()->json($news, 200);
     }
@@ -83,6 +106,11 @@ class NewsController extends Controller
 
         if (!$news) {
             return response()->json(['message' => 'News not found'], 404);
+        }
+
+        if ($news->image_url) {
+            $imagePath = str_replace('/storage/', '', $news->image_url);
+            Storage::disk('public')->delete($imagePath);
         }
 
         $news->delete();

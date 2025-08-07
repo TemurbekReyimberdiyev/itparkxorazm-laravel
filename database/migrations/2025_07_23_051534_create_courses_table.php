@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('heading');
             $table->text('description');
             $table->integer('duration_month');
-            $table->string('image_url');
+            $table->text('image_url');
             $table->integer('cost');
             $table->timestamps();
         });

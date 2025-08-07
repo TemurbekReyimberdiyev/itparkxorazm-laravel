@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Mentor;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MentorController extends Controller
 {
@@ -28,16 +29,21 @@ class MentorController extends Controller
             'education' => 'required|string',
             'experience_years' => 'required|integer',
             'students' => 'nullable|integer',
-            'image_url' => 'required|string',
-            'skills' => 'array', // [1, 2, 3]
+            'image' => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
+            'skills' => 'array',
         ]);
 
+        // Rasmni saqlash
+        $path = $request->file('image')->store('mentors', 'public');
+        $data['image_url'] = '/storage/' . $path;
+
         $mentor = Mentor::create($data);
+
         if ($request->has('skills')) {
             $mentor->skills()->sync($request->skills);
         }
 
-        return $mentor->load('skills');
+        return $mentor->load('course', 'skills');
     }
 
     /**
@@ -62,16 +68,29 @@ class MentorController extends Controller
             'education' => 'sometimes|string',
             'experience_years' => 'sometimes|integer',
             'students' => 'sometimes|integer',
-            'image_url' => 'sometimes|string',
-            'skills' => 'array', // optional
+            'image' => 'sometimes|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
+            'skills' => 'sometimes|array',
         ]);
 
+        if ($request->hasFile('image')) {
+            // Eski rasmni o‘chirish (ixtiyoriy)
+            if ($mentor->image_url) {
+                $oldPath = str_replace('/storage/', '', $mentor->image_url);
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            // Yangi rasmni saqlash
+            $path = $request->file('image')->store('mentors', 'public');
+            $data['image_url'] = '/storage/' . $path;
+        }
+
         $mentor->update($data);
+
         if ($request->has('skills')) {
             $mentor->skills()->sync($request->skills);
         }
 
-        return $mentor->load('skills');
+        return $mentor->load('course', 'skills');
     }
 
     /**
@@ -79,6 +98,16 @@ class MentorController extends Controller
      */
     public function destroy(string $id)
     {
-        return Mentor::destroy($id);
+        $mentor = Mentor::findOrFail($id);
+
+        // Eski rasmni o‘chirish
+        if ($mentor->image_url) {
+            $imagePath = str_replace('/storage/', '', $mentor->image_url);
+            Storage::disk('public')->delete($imagePath);
+        }
+
+        $mentor->delete();
+
+        return response()->json(['message' => 'Mentor o‘chirildi'], 200);
     }
 }

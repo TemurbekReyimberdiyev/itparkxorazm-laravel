@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-
 class Mentor extends Model
 {
     use HasFactory;
@@ -28,5 +27,10 @@ class Mentor extends Model
     public function skills()
     {
         return $this->belongsToMany(Skill::class, 'mentor_skills');
+    }
+
+    public function getFullNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
     }
 }

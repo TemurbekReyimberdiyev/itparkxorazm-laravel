@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Models\Skill;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SkillController extends Controller
 {
@@ -23,10 +25,18 @@ class SkillController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string',
-            'image_url' => 'required|string',
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        return Skill::create($data);
+        // Faylni saqlash
+        $path = $request->file('image')->store('skills', 'public');
+
+        $skill = Skill::create([
+            'name' => $data['name'],
+            'image_url' => $path,
+        ]);
+
+        return response()->json($skill, 201);
     }
 
     /**
@@ -46,12 +56,22 @@ class SkillController extends Controller
 
         $data = $request->validate([
             'name' => 'sometimes|string',
-            'image_url' => 'sometimes|string',
+            'image' => 'sometimes|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            // Eski rasmni o‘chirish (agar mavjud bo‘lsa)
+            if ($skill->image_url && Storage::disk('public')->exists($skill->image_url)) {
+                Storage::disk('public')->delete($skill->image_url);
+            }
+
+            // Yangi rasmni saqlash
+            $data['image_url'] = $request->file('image')->store('skills', 'public');
+        }
 
         $skill->update($data);
 
-        return $skill;
+        return response()->json($skill, 200);
     }
 
     /**
@@ -59,6 +79,15 @@ class SkillController extends Controller
      */
     public function destroy(string $id)
     {
-        return Skill::destroy($id);
+        $skill = Skill::findOrFail($id);
+
+        // Rasmni o‘chirish
+        if ($skill->image_url && Storage::disk('public')->exists($skill->image_url)) {
+            Storage::disk('public')->delete($skill->image_url);
+        }
+
+        $skill->delete();
+
+        return response()->json(['message' => 'Skill deleted'], 200);
     }
 }

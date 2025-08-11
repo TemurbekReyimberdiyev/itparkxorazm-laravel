@@ -35,11 +35,15 @@ class CourseController extends Controller
         // Rasmni saqlash
         $path = $request->file('image')->store('courses', 'public');
 
-        // To'liq URL emas, nisbiy yo'lni bazaga yozamiz
+        // MassAssignment xatosini oldini olish uchun `image` ni olib tashlaymiz
+        unset($data['image']);
+
+        // Bazaga saqlanadigan nisbiy yo‘l
         $data['image_url'] = '/storage/' . $path;
 
         return Course::create($data);
     }
+
 
     /**
      * Display the specified resource.

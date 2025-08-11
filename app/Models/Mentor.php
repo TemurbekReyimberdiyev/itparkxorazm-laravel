@@ -29,8 +29,11 @@ class Mentor extends Model
         return $this->belongsToMany(Skill::class, 'mentor_skills');
     }
 
-    public function getFullNameAttribute()
+    public function getImageUrlAttribute($value)
     {
-        return $this->first_name . ' ' . $this->last_name;
+        if ($value && !str_starts_with($value, 'http')) {
+            return asset('storage/' . ltrim($value, '/'));
+        }
+        return $value;
     }
 }

@@ -22,7 +22,11 @@ class Course extends Model
     // Accessor for full image URL
     public function getImageUrlAttribute($value)
     {
-        return $value ? asset($value) : null;
+        // Agar value 'storage/' bilan boshlanmasa, uni qo'shib yuboramiz
+        if ($value && !str_starts_with($value, 'http')) {
+            return asset('storage/' . ltrim($value, '/'));
+        }
+        return $value;
     }
 
     public function category()

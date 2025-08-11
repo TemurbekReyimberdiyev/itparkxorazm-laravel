@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Category; // <-- Kiritilmadi, qo‘shildi
+use Illuminate\Support\Facades\Validator; // <-- Kiritilmadi, qo‘shildi
 
 class CategoryController extends Controller
 {

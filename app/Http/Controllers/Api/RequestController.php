@@ -3,22 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Illuminate\Http\Request as HttpRequest;
+use App\Models\Request;
+use Illuminate\Support\Facades\Validator;
 
 class RequestController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         return response()->json(Request::with('course')->latest()->get(), 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(HttpRequest $request)
     {
         $validator = Validator::make($request->all(), [
             'name'      => 'required|string|max:255',
@@ -32,7 +28,8 @@ class RequestController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $created = Request::create($request->all());
+        $validated = $validator->validated();
+        $created = Request::create($validated);
 
         return response()->json([
             'message' => 'Request submitted successfully',
@@ -40,10 +37,7 @@ class RequestController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show($id)
     {
         $request = Request::with('course')->find($id);
 
@@ -54,10 +48,7 @@ class RequestController extends Controller
         return response()->json($request, 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(HttpRequest $request, $id)
     {
         $data = Request::find($id);
 
@@ -77,7 +68,7 @@ class RequestController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $data->update($request->all());
+        $data->update($validator->validated());
 
         return response()->json([
             'message' => 'Request updated successfully',
@@ -85,10 +76,7 @@ class RequestController extends Controller
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         $request = Request::find($id);
 

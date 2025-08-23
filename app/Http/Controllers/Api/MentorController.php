@@ -35,7 +35,7 @@ class MentorController extends Controller
 
         // Rasmni saqlash
         $path = $request->file('image')->store('mentors', 'public');
-        $data['image_url'] = '/storage/' . $path;
+        $data['image_url'] = $path;
 
         $mentor = Mentor::create($data);
 
@@ -81,7 +81,7 @@ class MentorController extends Controller
 
             // Yangi rasmni saqlash
             $path = $request->file('image')->store('mentors', 'public');
-            $data['image_url'] = '/storage/' . $path;
+            $data['image_url'] = $path;
         }
 
         $mentor->update($data);

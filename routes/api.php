@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\MentorSkillController;
 use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\RequestController;
 use App\Http\Controllers\Api\SkillController;
+use App\Http\Controllers\Api\AuthController;
+
 
 // Har bir resurs uchun CRUD API marshrutlari
 Route::apiResource('categories', CategoryController::class);      // /api/categories
@@ -19,3 +21,11 @@ Route::apiResource('mentor-skills', MentorSkillController::class); // /api/mento
 Route::apiResource('news', NewsController::class);                // /api/news
 Route::apiResource('requests', RequestController::class);         // /api/requests
 
+Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // admin panel uchun API'lar shu yerda
+
+});

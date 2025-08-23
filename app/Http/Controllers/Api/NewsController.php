@@ -37,7 +37,7 @@ class NewsController extends Controller
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('news', 'public');
-            $data['image_url'] = '/storage/' . $path;
+            $data['image_url'] = $path;
         }
 
         $news = News::create($data);
@@ -89,7 +89,7 @@ class NewsController extends Controller
             }
 
             $path = $request->file('image')->store('news', 'public');
-            $data['image_url'] = '/storage/' . $path;
+            $data['image_url'] =  $path;
         }
 
         $news->update($data);

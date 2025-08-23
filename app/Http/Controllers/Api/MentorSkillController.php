@@ -4,17 +4,20 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Mentor;
+
 
 class MentorSkillController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index($mentorId)
+    public function index()
     {
-        $mentor = Mentor::with('skills')->findOrFail($mentorId);
-        return response()->json($mentor->skills, 200);
+        $mentors = Mentor::with('skills')->get();
+        return response()->json($mentors, 200);
     }
+
 
     /**
      * Store a newly created resource in storage.

@@ -39,7 +39,7 @@ class CourseController extends Controller
         unset($data['image']);
 
         // Bazaga saqlanadigan nisbiy yo‘l
-        $data['image_url'] = '/storage/' . $path;
+        $data['image_url'] = $path;
 
         return Course::create($data);
     }
@@ -79,7 +79,7 @@ class CourseController extends Controller
 
             // Yangi rasmni yuklash
             $path = $request->file('image')->store('courses', 'public');
-            $data['image_url'] = '/storage/' . $path;
+            $data['image_url'] = $path;
         }
 
         $course->update($data);

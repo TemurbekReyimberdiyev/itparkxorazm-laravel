@@ -9,7 +9,7 @@ class Skill extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'image_url'];
+    protected $fillable = ['name', 'image_path'];
 
     protected $appends = ['full_image_url'];
 
@@ -21,8 +21,8 @@ class Skill extends Model
     // 🔽 Full image URL accessor
     public function getFullImageUrlAttribute()
     {
-        return $this->image_url
-            ? asset('storage/' . $this->image_url)
+        return $this->image_path
+            ? asset('storage/' . $this->image_path)
             : null;
     }
 }

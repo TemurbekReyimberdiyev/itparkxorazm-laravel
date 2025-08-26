@@ -18,7 +18,7 @@ class SkillController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp,svg|max:2048',
         ]);
 
         $path = $request->file('image')->store('skills', 'public');

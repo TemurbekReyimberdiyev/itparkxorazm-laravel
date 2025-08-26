@@ -20,6 +20,8 @@ Route::apiResource('skills', SkillController::class);             // /api/skills
 Route::apiResource('mentor-skills', MentorSkillController::class); // /api/mentor-skills
 Route::apiResource('news', NewsController::class);                // /api/news
 Route::apiResource('requests', RequestController::class);         // /api/requests
+Route::post('/mentors/{mentor}/skills', [MentorSkillController::class, 'attach']);
+Route::delete('/mentors/{mentor}/skills/{skill}', [MentorSkillController::class, 'detach']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {

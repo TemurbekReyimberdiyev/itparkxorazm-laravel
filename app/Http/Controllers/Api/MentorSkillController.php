@@ -6,22 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Mentor;
 
-
 class MentorSkillController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $mentors = Mentor::with('skills')->get();
+        $mentors = Mentor::with('skills')->paginate(10);
         return response()->json($mentors, 200);
     }
 
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request, $mentorId)
     {
         $request->validate([
@@ -30,35 +22,26 @@ class MentorSkillController extends Controller
         ]);
 
         $mentor = Mentor::findOrFail($mentorId);
+
+        // Faqat yangi qo‘shish:
         $mentor->skills()->syncWithoutDetaching($request->skill_ids);
+
+        // Agar to‘liq almashtirmoqchi bo‘lsangiz:
+        // $mentor->skills()->sync($request->skill_ids);
 
         return response()->json(['message' => 'Skills attached successfully'], 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function destroy(Request $request, $mentorId)
     {
-        //
-    }
+        $request->validate([
+            'skill_ids' => 'required|array',
+            'skill_ids.*' => 'exists:skills,id',
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($mentorId, $skillId)
-    {
         $mentor = Mentor::findOrFail($mentorId);
-        $mentor->skills()->detach($skillId);
+        $mentor->skills()->detach($request->skill_ids);
 
-        return response()->json(['message' => 'Skill detached successfully'], 200);
+        return response()->json(['message' => 'Skills detached successfully'], 200);
     }
 }

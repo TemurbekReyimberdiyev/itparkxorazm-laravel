@@ -16,26 +16,34 @@ class RequestController extends Controller
 
     public function store(HttpRequest $request)
     {
-        $validator = Validator::make($request->all(), [
+        // ✅ Bo‘sh stringlarni nullga aylantirish
+        $data = $request->all();
+        foreach (['mail', 'course_id', 'message'] as $field) {
+            if (isset($data[$field]) && $data[$field] === '') {
+                $data[$field] = null;
+            }
+        }
+
+        $validator = Validator::make($data, [
             'name'      => 'required|string|max:255',
             'number'    => 'required|string|max:50',
-            'mail'      => 'required|email',
-            'course_id' => 'required|exists:courses,id',
-            'message'   => 'nullable|string'
+            'mail'      => 'nullable|email',
+            'course_id' => 'nullable|exists:courses,id',
+            'message'   => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $validated = $validator->validated();
-        $created = Request::create($validated);
+        $created = Request::create($validator->validated());
 
         return response()->json([
             'message' => 'Request submitted successfully',
             'data' => $created
         ], 201);
     }
+
 
     public function show($id)
     {
@@ -56,16 +64,24 @@ class RequestController extends Controller
             return response()->json(['message' => 'Request not found'], 404);
         }
 
-        $validator = Validator::make($request->all(), [
+        // ✅ Bo‘sh stringlarni nullga aylantirish
+        $input = $request->all();
+        foreach (['mail', 'course_id', 'message'] as $field) {
+            if (isset($input[$field]) && $input[$field] === '') {
+                $input[$field] = null;
+            }
+        }
+
+        $validator = Validator::make($input, [
             'name'      => 'required|string|max:255',
             'number'    => 'required|string|max:50',
-            'mail'      => 'required|email',
-            'course_id' => 'required|exists:courses,id',
+            'mail'      => 'nullable|email',
+            'course_id' => 'nullable|exists:courses,id',
             'message'   => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
         $data->update($validator->validated());
@@ -75,6 +91,7 @@ class RequestController extends Controller
             'data' => $data
         ], 200);
     }
+
 
     public function destroy($id)
     {

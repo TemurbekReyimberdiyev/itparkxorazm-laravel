@@ -13,13 +13,19 @@ return new class extends Migration
     {
         Schema::create('requests', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('number');
-            $table->string('mail');
-            $table->foreignId('course_id')->constrained()->onDelete('cascade');
-            $table->text('message')->nullable();
+            $table->string('name');   // majburiy
+            $table->string('number'); // majburiy
+
+            $table->string('mail')->nullable(); // ✅ optional
+            $table->foreignId('course_id')
+                ->nullable() // ✅ optional
+                ->constrained()
+                ->nullOnDelete(); // kurs o‘chsa -> null qilinadi
+
+            $table->text('message')->nullable(); // ✅ optional
             $table->timestamps();
         });
+
     }
 
     /**
